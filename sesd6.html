@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Builder Pattern – LoanApplication (Banking App)</title>
+  <!-- Tailwind via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Background banking image + overlay */
+    body {
+      background: url('https://images.unsplash.com/photo-1567427018141-0584cfcbf1b8?auto=format&fit=crop&w=1600&q=80') no-repeat center center fixed;
+      background-size: cover;
+      position: relative;
+    }
+    body::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.85); /* White overlay for readability */
+      z-index: -1;
+    }
+    pre { white-space: pre-wrap; word-wrap: break-word; }
+  </style>
+</head>
+<body class="text-slate-900">
+  <div class="max-w-6xl mx-auto p-6">
+    <header class="mb-6">
+      <h1 class="text-3xl font-bold">Builder Pattern – Step-by-Step Construction</h1>
+      <p class="text-sm text-slate-600 mt-1">Banking App example: build a <span class="font-semibold">LoanApplication</span> with required and optional fields using a fluent Builder.</p>
+    </header>
+
+    <!-- Explanation Card -->
+    <div class="bg-white rounded-2xl shadow p-5 mb-6">
+      <h2 class="text-xl font-semibold mb-2">Why Builder?</h2>
+      <ul class="list-disc ml-6 space-y-1 text-sm">
+        <li>Construct complex objects <em>step-by-step</em> (fluent method chaining).</li>
+        <li>Avoids constructor telescoping; makes optional features easy to add.</li>
+        <li>Client code stays readable and stable even as the product grows.</li>
+      </ul>
+    </div>
+
+    <!-- Form + Preview Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Form Card -->
+      <div class="bg-white rounded-2xl shadow p-5">
+        <h3 class="text-lg font-semibold mb-4">Build Loan Application</h3>
+        <form id="loanForm" class="space-y-4">
+          <!-- Customer Details -->
+          <div>
+            <h4 class="font-semibold mb-2">Customer</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <label class="block text-sm">Name
+                <input id="customerName" class="mt-1 w-full rounded-xl border p-2" placeholder="e.g., Aditi Sharma" required />
+              </label>
+              <label class="block text-sm">Email
+                <input id="customerEmail" type="email" class="mt-1 w-full rounded-xl border p-2" placeholder="e.g., aditi@example.com" />
+              </label>
+              <label class="block text-sm">Phone
+                <input id="customerPhone" class="mt-1 w-full rounded-xl border p-2" placeholder="e.g., +91-98765-43210" />
+              </label>
+              <label class="block text-sm">Credit Score (optional)
+                <input id="creditScore" type="number" class="mt-1 w-full rounded-xl border p-2" min="300" max="900" placeholder="e.g., 780" />
+              </label>
+            </div>
+          </div>
+
+          <!-- Loan Details -->
+          <div>
+            <h4 class="font-semibold mb-2">Loan Details</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <label class="block text-sm">Loan Type
+                <select id="loanType" class="mt-1 w-full rounded-xl border p-2">
+                  <option value="HOME">Home</option>
+                  <option value="AUTO">Auto</option>
+                  <option value="PERSONAL">Personal</option>
+                  <option value="EDUCATION">Education</option>
+                  <option value="BUSINESS">Business</option>
+                </select>
+              </label>
+              <label class="block text-sm">Principal (₹)
+                <input id="principal" type="number" class="mt-1 w-full rounded-xl border p-2" min="10000" step="1000" placeholder="e.g., 1500000" required />
+              </label>
+              <label class="block text-sm">Interest Rate (% p.a.)
+                <input id="interest" type="number" class="mt-1 w-full rounded-xl border p-2" min="1" step="0.1" placeholder="e.g., 8.5" required />
+              </label>
+              <label class="block text-sm">Tenure (months)
+                <input id="tenure" type="number" class="mt-1 w-full rounded-xl border p-2" min="6" step="1" placeholder="e.g., 240" required />
+              </label>
+            </div>
+          </div>
+
+          <!-- Optional Features -->
+          <div>
+            <h4 class="font-semibold mb-2">Optional Features</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+              <label class="inline-flex items-center gap-2">
+                <input id="hasCollateral" type="checkbox" class="rounded" />
+                Collateral Provided
+              </label>
+              <label class="inline-flex items-center gap-2">
+                <input id="hasCoApplicant" type="checkbox" class="rounded" />
+                Co-applicant
+              </label>
+              <label class="inline-flex items-center gap-2">
+                <input id="prepayment" type="checkbox" class="rounded" />
+                Prepayment Allowed
+              </label>
+              <label class="inline-flex items-center gap-2">
+                <input id="insurance" type="checkbox" class="rounded" />
+                Insurance Add-on
+              </label>
+            </div>
+          </div>
+
+          <!-- Documents -->
+          <div>
+            <h4 class="font-semibold mb-2">Documents</h4>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
+              <label class="inline-flex items-center gap-2"><input type="checkbox" class="doc" value="PAN"/> PAN</label>
+              <label class="inline-flex items-center gap-2"><input type="checkbox" class="doc" value="Aadhaar"/> Aadhaar</label>
+              <label class="inline-flex items-center gap-2"><input type="checkbox" class="doc" value="Bank Statement"/> Bank Statement</label>
+              <label class="inline-flex items-center gap-2"><input type="checkbox" class="doc" value="Salary Slip"/> Salary Slip</label>
+              <label class="inline-flex items-center gap-2"><input type="checkbox" class="doc" value="ITR"/> ITR</label>
+              <label class="inline-flex items-center gap-2"><input type="checkbox" class="doc" value="Property Papers"/> Property Papers</label>
+            </div>
+          </div>
+
+          <!-- Approval Stage -->
+          <div>
+            <h4 class="font-semibold mb-2">Approval Stage</h4>
+            <select id="approvalStage" class="w-full rounded-xl border p-2">
+              <option value="DRAFT">Draft</option>
+              <option value="SUBMITTED">Submitted</option>
+              <option value="UNDERWRITING">Underwriting</option>
+              <option value="APPROVED">Approved</option>
+              <option value="REJECTED">Rejected</option>
+            </select>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3 pt-2">
+            <button type="button" id="buildBtn" class="px-4 py-2 rounded-2xl bg-slate-900 text-white hover:bg-slate-800">Build Application</button>
+            <button type="button" id="resetBtn" class="px-4 py-2 rounded-2xl border">Reset</button>
+            <span id="status" class="text-sm text-slate-600"></span>
+          </div>
+        </form>
+      </div>
+
+      <!-- Preview Card -->
+      <div class="bg-white rounded-2xl shadow p-5">
+        <h3 class="text-lg font-semibold mb-2">Resulting Object (Immutable)</h3>
+        <pre id="output" class="bg-slate-900 text-slate-100 rounded-xl p-4 text-xs overflow-auto min-h-[320px]"></pre>
+
+        <h4 class="font-semibold mt-4 mb-2">EMI (Rough) – Reduces with Prepayment</h4>
+        <div id="emi" class="text-sm"></div>
+
+        <details class="mt-4">
+          <summary class="cursor-pointer font-semibold">Show Builder Implementation (JavaScript)</summary>
+          <pre class="bg-slate-100 rounded-xl p-3 text-[11px] overflow-auto" id="codeView"></pre>
+        </details>
+      </div>
+    </div>
+
+    <!-- How easy to extend? -->
+    <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 mt-6">
+      <h3 class="font-semibold">Adding a new optional feature is trivial</h3>
+      <p class="text-sm">This demo already includes <code>creditScore</code> and <code>insuranceAddOn</code> as optional fields. To add another (e.g., <code>relationshipManager</code>), just:</p>
+      <ol class="list-decimal ml-6 text-sm">
+        <li>Add a chain method in <code>LoanApplicationBuilder</code> (no change to client code).</li>
+        <li>Optionally wire it to the UI if you want users to set it.</li>
+      </ol>
+    </div>
+  </div>
+
+  <script>
+    // -----------------------------
+    // Product: LoanApplication
+    // -----------------------------
+    class LoanApplication {
+      constructor(builder) {
+        // Required
+        this.customerName = builder.customerName;
+        this.loanType = builder.loanType;
+        this.principal = builder.principal;
+        this.interestRate = builder.interestRate;
+        this.tenureMonths = builder.tenureMonths;
+
+        // Optional
+        this.customerEmail = builder.customerEmail ?? null;
+        this.customerPhone = builder.customerPhone ?? null;
+        this.creditScore = builder.creditScore ?? null;
+        this.documents = Object.freeze([...(builder.documents || [])]);
+        this.collateral = builder.collateral ?? false;
+        this.coApplicant = builder.coApplicant ?? null;
+        this.prepaymentAllowed = builder.prepaymentAllowed ?? false;
+        this.insuranceAddOn = builder.insuranceAddOn ?? false;
+        this.approvalStage = builder.approvalStage ?? 'DRAFT';
+
+        Object.freeze(this);
+      }
+    }
+
+    // Builder
+    class LoanApplicationBuilder {
+      constructor(customerName, loanType, principal, interestRate, tenureMonths) {
+        this.customerName = customerName;
+        this.loanType = loanType;
+        this.principal = Number(principal);
+        this.interestRate = Number(interestRate);
+        this.tenureMonths = Number(tenureMonths);
+        this.documents = [];
+        this.approvalStage = 'DRAFT';
+      }
+
+      setCustomerEmail(email) { this.customerEmail = email; return this; }
+      setCustomerPhone(phone) { this.customerPhone = phone; return this; }
+      setCreditScore(score) { this.creditScore = Number(score); return this; }
+      addDocument(doc) { if (doc) this.documents.push(doc); return this; }
+      addDocuments(docs) { (docs || []).forEach(d => this.addDocument(d)); return this; }
+      setCollateral(flag = true) { this.collateral = !!flag; return this; }
+      setCoApplicant(nameOrFlag) { this.coApplicant = nameOrFlag ?? true; return this; }
+      allowPrepayment(flag = true) { this.prepaymentAllowed = !!flag; return this; }
+      enableInsuranceAddOn(flag = true) { this.insuranceAddOn = !!flag; return this; }
+      setApprovalStage(stage) { this.approvalStage = stage; return this; }
+
+      validate() {
+        if (!this.customerName?.trim()) throw new Error('Customer name is required');
+        if (!['HOME','AUTO','PERSONAL','EDUCATION','BUSINESS'].includes(this.loanType)) throw new Error('Invalid loan type');
+        if (!(this.principal > 0)) throw new Error('Principal must be > 0');
+        if (!(this.interestRate > 0)) throw new Error('Interest rate must be > 0');
+        if (!(this.tenureMonths >= 6)) throw new Error('Tenure must be at least 6 months');
+      }
+
+      build() {
+        this.validate();
+        return new LoanApplication(this);
+      }
+    }
+
+    const $ = (s) => document.querySelector(s);
+    const out = $('#output');
+    const emiBox = $('#emi');
+    const codeView = $('#codeView');
+
+    codeView.textContent = `${LoanApplication.toString()}\n\n${LoanApplicationBuilder.toString()}`;
+
+    function calcEMI(principal, annualRatePct, months, prepaymentAllowed) {
+      const r = (annualRatePct / 12) / 100;
+      const n = months;
+      if (r === 0) return principal / n;
+      let emi = principal * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+      if (prepaymentAllowed) emi *= 0.98;
+      return emi;
+    }
+
+    function buildFromForm() {
+      const name = $('#customerName').value;
+      const email = $('#customerEmail').value;
+      const phone = $('#customerPhone').value;
+      const creditScore = $('#creditScore').value;
+      const loanType = $('#loanType').value;
+      const principal = Number($('#principal').value);
+      const interest = Number($('#interest').value);
+      const tenure = Number($('#tenure').value);
+      const docs = [...document.querySelectorAll('.doc:checked')].map(d => d.value);
+      const hasCollateral = $('#hasCollateral').checked;
+      const hasCoApplicant = $('#hasCoApplicant').checked;
+      const prepayment = $('#prepayment').checked;
+      const insurance = $('#insurance').checked;
+      const approvalStage = $('#approvalStage').value;
+
+      const builder = new LoanApplicationBuilder(name, loanType, principal, interest, tenure)
+        .setCustomerEmail(email)
+        .setCustomerPhone(phone)
+        .addDocuments(docs)
+        .setApprovalStage(approvalStage);
+
+      if (creditScore) builder.setCreditScore(creditScore);
+      if (hasCollateral) builder.setCollateral(true);
+      if (hasCoApplicant) builder.setCoApplicant(true);
+      if (prepayment) builder.allowPrepayment(true);
+      if (insurance) builder.enableInsuranceAddOn(true);
+
+      const application = builder.build();
+      out.textContent = JSON.stringify(application, null, 2);
+      const emi = calcEMI(application.principal, application.interestRate, application.tenureMonths, application.prepaymentAllowed);
+      emiBox.innerHTML = `Estimated EMI: <span class="font-semibold">₹${emi.toFixed(2)}</span> / month`;
+
+      return application;
+    }
+
+    $('#buildBtn').addEventListener('click', () => {
+      try {
+        buildFromForm();
+        $('#status').textContent = 'Built successfully ✅';
+        setTimeout(() => $('#status').textContent = '', 2000);
+      } catch (e) {
+        $('#status').textContent = e.message;
+      }
+    });
+
+    $('#resetBtn').addEventListener('click', () => {
+      document.getElementById('loanForm').reset();
+      out.textContent = '';
+      emiBox.textContent = '';
+      $('#status').textContent = '';
+    });
+
+    (function demoConsoleBuilds(){
+      const personalLoan = new LoanApplicationBuilder('Rahul Verma', 'PERSONAL', 300000, 12.5, 36)
+        .addDocument('PAN')
+        .addDocument('Aadhaar')
+        .allowPrepayment()
+        .build();
+
+      const homeLoan = new LoanApplicationBuilder('Neha Gupta', 'HOME', 4500000, 8.35, 240)
+        .setCreditScore(805)
+        .setCollateral(true)
+        .enableInsuranceAddOn(true)
+        .setApprovalStage('SUBMITTED')
+        .build();
+
+      console.log('Demo – Personal Loan', personalLoan);
+      console.log('Demo – Home Loan', homeLoan);
+    })();
+  </script>
+</body>
+</html>
